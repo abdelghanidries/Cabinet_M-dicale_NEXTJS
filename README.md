@@ -34,3 +34,27 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+npx create-next-app@latest ./
+npx shadcn@latest init
+npm i react-icons
+npx shadcn@latest add form
+npm install prisma --legacy-peer-deps
+npx prisma init
+npx prisma generate(genereer un client)
+npm i @auth/prisma-adapter --legacy-peer-deps
+npm i bcrypt --legacy-peer-deps
+npm i @types/bcrypt --legacy-peer-deps 
+npm install next-auth@beta --legacy-peer-deps
+npm install bcryptjs --legacy-peer-deps
+npm install --save-dev @types/bcryptjs --legacy-peer-deps
+npx prisma studio
+npx prisma migrate 
+npx prisma db push
+npm i react-redux @reduxjs/toolkit --legacy-peer-deps
+npx prisma migrate dev --name ajout_role
+npx prisma generate
+npm install -D typescript ts-node @types/node
+npx prisma db seed
+npx prisma validate
+
