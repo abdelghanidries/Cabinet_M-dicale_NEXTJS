@@ -1,0 +1,113 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+enum RoleType {  // Nouveau ENUM pour Role
+  ADMIN
+  ADMIN_Imagery
+  ADMIN_LAB_ANALYSE
+  Doctor
+}
+
+enum UserRole {  // Enum séparé pour User (inclut tous les rôles)
+  ADMIN
+  ADMIN_Imagery
+  ADMIN_LAB_ANALYSE
+  Doctor
+  USER
+}
+
+enum AppointmentStatus { // Statut du rendez-vous
+  PENDING    // En attente
+  CONFIRMED  // Confirmé
+  CANCELLED  // Annulé
+  COMPLETED  // Terminé
+}
+
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  lastname      String
+  email         String   @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  password      String
+  role          UserRole  @default(USER) 
+  code          String?   
+  
+  accounts      Account[]
+  roleCode      Role?   @relation(fields: [code], references: [code])
+
+  // Correction ici : on supprime `references: [id]` dans les relations
+  appointmentsAsDoctor Appointment[] @relation("DoctorAppointments")
+  appointmentsAsPatient Appointment[] @relation("PatientAppointments")
+
+  @@map("users")
+}
+
+
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String  @map("user_id")
+  type               String
+  provider           String
+  providerAccountId  String  @map("provider_account_id")
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String? @db.Text
+  session_state      String?
+ 
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+ 
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+
+
+
+
+
+model Role {
+  code     String   @id
+  roleType RoleType  // Seuls certains rôles sont possibles ici
+  name     String
+  lastname String
+  users    User[]  // Relation avec User
+
+  @@map("roles")
+}
+
+
+model Appointment {
+  id        String            @id @default(cuid())
+  date      DateTime          // Date du rendez-vous
+  status    AppointmentStatus @default(PENDING) // Statut par défaut : En attente
+  reason    String            // Raison du rendez-vous
+
+  // Relation avec le patient (Utilisateur)
+  patientId String?
+  patient   User? @relation("PatientAppointments", fields: [patientId], references: [id])
+
+  // Relation avec le docteur
+  doctorId  String?
+  doctor    User? @relation("DoctorAppointments", fields: [doctorId], references: [id])
+
+  createdAt DateTime @default(now()) 
+  updatedAt DateTime @updatedAt
+}
