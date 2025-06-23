@@ -4,9 +4,23 @@ import { db } from "@/lib/db";
 // 🟢 Création d'un rendez-vous par un médecin
 export async function POST(req: Request) {
   try {
-    const { doctorId, date, reason } = await req.json();
+    const reqBody = await req.json(); // ← CORRECTION
 
-    // Vérifier si l'utilisateur est bien un médecin
+    const { 
+      date,
+      startTime,
+      endTime,
+      reason,
+      type,
+      doctorFirstName,
+      doctorLastName,
+      doctorSpeciality,
+      doctorId 
+    } = reqBody;
+
+    console.log("Contenu de reqBody:", reqBody); // ← Log correct
+
+    // Vérification du médecin
     const doctor = await db.user.findUnique({
       where: { id: doctorId },
     });
@@ -15,19 +29,45 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Seuls les médecins peuvent créer des rendez-vous" }, { status: 403 });
     }
 
-    // Créer le rendez-vous (sans patientId)
+    // Vérification du chevauchement de rendez-vous
+    const conflict = await db.appointment.findFirst({
+      where: {
+        doctorId,
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
+        status: { in: ["PENDING", "CONFIRMED"] },
+      },
+    });
+
+    if (conflict) {
+      return NextResponse.json({ error: "Créneau déjà réservé" }, { status: 409 });
+    }
+
+    // Création du rendez-vous
+    console.log("Valeurs reçues :", { date, startTime, endTime, reason, doctorId });
+
     const appointment = await db.appointment.create({
       data: {
-        doctorId,
         date: new Date(date),
+        startTime: new Date(startTime),
+        endTime: new Date(endTime),
         reason,
+        type,
+        doctorFirstName,
+        doctorLastName,
+        doctorSpeciality,
+        patientId: null,
         status: "PENDING",
-        patientId: null, // Aucun patient n'est encore associé
+        doctorId,
       },
     });
 
     return NextResponse.json(appointment, { status: 201 });
-  } catch (error) {
-    return NextResponse.json({ error: "Erreur lors de la création du rendez-vous" }, { status: 500 });
+  } catch (error: any) {
+    console.error("Erreur détaillée:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la création du rendez-vous: " + (error?.message || "Inconnue") },
+      { status: 500 }
+    );
   }
 }

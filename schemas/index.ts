@@ -27,8 +27,20 @@ export const RegisterSchema = z.object({
     }),
     role: z.nativeEnum(UserRole).optional(), // ✅ Vérifie que `role` est une valeur de `UserRole
     code: z.string().optional(),
+    doctorSpeciality : z.string().optional(),
    
-});
+}).refine(
+    (data) => {
+      if (data.role === "Doctor") {
+        return !!data.doctorSpeciality;
+      }
+      return true;
+    },
+    {
+      message: "La spécialité est requise pour les docteurs.",
+      path: ["doctorSpeciality"]
+    }
+  );
 
 
 export const RoleSchema = z.object({

@@ -17,7 +17,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     return { error: "Invalid fields!" };
   }
 
-  const { email, password, name, lastname, role, code } = validatedField.data;
+  const { email, password, name, lastname, role, code , doctorSpeciality} = validatedField.data;
 
   // Hashing du mot de passe
   const hashedPassword = await bcrypt.hash(password, 10);
@@ -37,6 +37,7 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
     role,
     // Si le rôle est "USER", le code est optionnel, donc on le définit à null
     code: role === "USER" ? null : code,  // Si le rôle est "USER", le code est `null`
+    doctorSpeciality: role === "Doctor" ? doctorSpeciality : null
   };
 
   // Créer l'utilisateur dans la base de données
@@ -47,5 +48,6 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   // TODO: Envoyer un email de vérification (code pour l'email ici)
 
   // Redirection après la création
-  return redirect("/"); // Redirige l'utilisateur après l'enregistrement
+  return { success: true };
+ // Redirige l'utilisateur après l'enregistrement
 };

@@ -31,6 +31,10 @@ export const {
       if (existingUser) {
         token.id = existingUser.id;
         token.role = existingUser.role;
+        token.name = existingUser.name;
+        token.lastname = existingUser.lastname;
+        token.doctorSpecialit = existingUser.doctorSpeciality;
+        
         console.log("🔍 Token after:", token);
       }
   
@@ -44,6 +48,8 @@ export const {
       if (token.sub && session.user) {
         session.user.id = token.sub;
         session.user.role = token.role || "USER";
+        session.user.lastname = token.lastname ;
+        session.user.doctorSpeciality  = token.doctorSpecialit;
       }
   
       console.log("🔍 Final session:", session);

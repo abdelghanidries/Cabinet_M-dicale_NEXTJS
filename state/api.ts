@@ -27,16 +27,44 @@ export interface Users {
 
 export const appointmentApi = createApi({
   reducerPath: 'appointmentApi',
-  baseQuery: fetchBaseQuery({ baseUrl: '/api/auth' }),
+  baseQuery: fetchBaseQuery({ baseUrl: '/api/auth',
+    prepareHeaders: (headers) => {
+      headers.set('Content-Type', 'application/json');
+      return headers;
+    },
+   }),
   tagTypes: ['Appointment'],
   endpoints: (builder) => ({
     // Endpoint pour créer un rendez-vous par le médecin
     createAppointment: builder.mutation({
-      query: ({ doctorId, date, reason }) => ({
-        url: '/appointments', // On suppose que l'API POST se trouve sur /api/appointments
+      query: ({
+        doctorId,
+        date,
+        startTime,
+        endTime,
+        reason,
+        type,
+        doctorFirstName,
+        doctorLastName,
+        doctorSpeciality,
+        status,
+      }) => ({
+        url: '/appointments',
         method: 'POST',
-        body: { doctorId, date, reason },
+        body: {
+          doctorId,
+          date,
+          startTime,
+          endTime,
+          reason,
+          type,
+          doctorFirstName,
+          doctorLastName,
+          doctorSpeciality,
+          status,
+        },
       }),
+    
       invalidatesTags: ['Appointment'],
     }),
     // Endpoint pour réserver un rendez-vous par le patient
@@ -56,9 +84,16 @@ export const appointmentApi = createApi({
 
     // Endpoint pour récupérer les rendez-vous disponibles (en attente)
     getAvailableAppointments: builder.query({
-      query: () => '/appointments/available',
+      query: ({ specialty, doctorId }) => ({
+        url: '/appointments/available',
+        params: { 
+          specialty, 
+          doctorId: doctorId || undefined 
+        }
+      }),
       providesTags: ['Appointment'],
     }),
+  
     fetchCompteData: builder.query<CompteData , void>({
       query: () => ({
         url: "api/auth",
@@ -75,6 +110,12 @@ export const appointmentApi = createApi({
       query: () => '/usersManagement',
       providesTags: ['Appointment'],
     }),
+
+    getDoctors: builder.query({
+      query: () => '/doctor', // Changement du chemin d'accès
+  providesTags: ['Appointment'],
+    }),
+   
    
   }),
 
@@ -90,5 +131,6 @@ export const {
   useGetAvailableAppointmentsQuery,
   useFetchCompteDataQuery,
   useGetUsersQuery,
+  useGetDoctorsQuery,
 
 } = appointmentApi;
