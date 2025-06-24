@@ -9,14 +9,13 @@
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  relationMode = "prisma" // Nécessaire pour Neon
+  relationMode = "prisma" // Conservez cette ligne
 }
 
 generator client {
   provider = "prisma-client-js"
-  
+  // SUPPRIMEZ la ligne previewFeatures
 }
-
 
 enum RoleType {  // Nouveau ENUM pour Role
   ADMIN
