@@ -20,12 +20,12 @@ export default function BookAppointmentCalendar() {
   const userId = session?.user.id;
   const [selectedSpecialty, setSelectedSpecialty] = useState("");
   const [selectedDoctor, setSelectedDoctor] = useState("");
-  const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedDay, setSelectedDay] = useState<Date | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   const { data: doctors, isLoading: isLoadingDoctors } = useGetDoctorsQuery();
-  const [bookAppointment, { isLoading }] = useBookAppointmentMutation();
+  const [bookAppointment, { isLoading, error: bookError }] = useBookAppointmentMutation();
 
   const {
     data: appointments,
@@ -41,29 +41,31 @@ export default function BookAppointmentCalendar() {
     doctors?.map(doctor => doctor.doctorSpeciality).filter(Boolean) || []
   )];
 
-  const filteredDoctors = selectedSpecialty
+  const filteredDoctors = selectedSpecialty 
     ? doctors?.filter(doctor => doctor.doctorSpeciality === selectedSpecialty)
     : doctors;
 
-  const groupedAppointments = appointments?.reduce((acc, appointment) => {
+  const groupedAppointments = appointments?.reduce((acc: Record<string, any[]>, appointment) => {
     try {
       const date = format(parseISO(appointment.startTime), "yyyy-MM-dd");
       acc[date] = acc[date] || [];
       acc[date].push(appointment);
-      return acc;
     } catch (error) {
-      console.error("Error parsing date:", appointment.startTime);
-      return acc;
+      console.error("Error parsing date for appointment:", {
+        error,
+        startTime: appointment?.startTime,
+      });
     }
+    return acc;
   }, {});
 
-  const handleReservation = async (appointmentId) => {
+  const handleReservation = async (appointmentId: string) => {
     try {
       await bookAppointment({ appointmentId, patientId: userId }).unwrap();
       await refetchAppointments();
       setSuccessMessage("Rendez-vous confirmé");
       setTimeout(() => setSuccessMessage(""), 3000);
-    } catch (err) {
+    } catch (err: any) {
       setErrorMessage(err.data?.message || "Erreur de réservation");
       setTimeout(() => setErrorMessage(""), 5000);
     }
@@ -91,7 +93,7 @@ export default function BookAppointmentCalendar() {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
         {filteredDoctors.map(doctor => (
-          <Card
+          <Card 
             key={doctor.id}
             className={`cursor-pointer transition-all hover:border-primary ${
               selectedDoctor === doctor.id ? 'border-2 border-primary' : ''
@@ -106,7 +108,7 @@ export default function BookAppointmentCalendar() {
                   </Badge>
                 </div>
               </div>
-              <Button
+              <Button 
                 variant="outline"
                 onClick={() => {
                   setSelectedDoctor(doctor.id);
@@ -123,7 +125,7 @@ export default function BookAppointmentCalendar() {
     );
   };
 
-  const DayContent = ({ date }) => {
+  const DayContent = ({ date }: { date: Date }) => {
     const dateKey = format(date, "yyyy-MM-dd");
     const hasAppointments = groupedAppointments?.[dateKey];
     const isToday = format(new Date(), "yyyy-MM-dd") === dateKey;
@@ -177,8 +179,8 @@ export default function BookAppointmentCalendar() {
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
                       Disponibilités du Dr. {doctors?.find(d => d.id === selectedDoctor)?.lastname}
                     </h2>
-                    <Button
-                      variant="ghost"
+                    <Button 
+                      variant="ghost" 
                       onClick={() => {
                         setSelectedDoctor("");
                         setSelectedDay(null);
@@ -210,12 +212,12 @@ export default function BookAppointmentCalendar() {
 
                   <div className="p-6 border-t border-gray-100 dark:border-gray-700">
                     <h3 className="text-lg font-semibold mb-4">
-                      {selectedDay ?
-                        format(selectedDay, "EEEE d MMMM yyyy", { locale: fr }) :
+                      {selectedDay ? 
+                        format(selectedDay, "EEEE d MMMM yyyy", { locale: fr }) : 
                         "Sélectionnez une date"
                       }
                     </h3>
-
+                    
                     {isLoadingAppointments ? (
                       <div className="space-y-4">
                         {[...Array(3)].map((_, i) => (
@@ -274,10 +276,10 @@ export default function BookAppointmentCalendar() {
             {successMessage}
           </div>
         )}
-        {errorMessage && (
+        {(errorMessage || bookError) && (
           <div className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center">
             <span className="mr-2">✕</span>
-            {errorMessage}
+            {errorMessage || (bookError as any)?.data?.message}
           </div>
         )}
         {getError && (
