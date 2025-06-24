@@ -14,7 +14,7 @@ import { login } from "@/actions/login";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { SuccessNotification } from "./SuccessNotification";
-import { ErrorNotification } from "./ErrorNotification"; // si tu veux gérer des erreurs aussi
+
 
 export const LoginForm = () => {
    const searchParams = useSearchParams();

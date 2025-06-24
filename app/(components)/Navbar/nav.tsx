@@ -24,12 +24,10 @@ const Nav = () => {
   const lastname = session?.user.lastname;
   const email = session?.user.email;
 
-  const [doctorId, setDoctorId] = useState('');
+  
   const dispatch = useAppDispatch();
   const isSidebarCollapsed = useAppSelector((state) => state.global.isSidebarCollapsed);
-  const isDarkMode = useAppSelector((state) => state.global.isDarkMode);
-
-  const toggleDarkMode = () => dispatch(setIsDarkMode(!isDarkMode));
+  
   const toggleSidebar = () => dispatch(setIsSidebarCollapsed(!isSidebarCollapsed));
 
   const getUserInitials = () => {

@@ -6,9 +6,9 @@ import { Bell, Menu, Moon, Settings, Sun } from "lucide-react";
 import Link from "next/link";
 import React from "react";
 
-type Props = {};
 
-const index = () => {
+
+const Index = () => {
   const dispatch = useAppDispatch();
   const isSidebarCollapsed = useAppSelector(
     (state) => state.global.isSidebarCollapsed,
@@ -83,4 +83,4 @@ const index = () => {
   );
 };
 
-export default index;
+export default Index;

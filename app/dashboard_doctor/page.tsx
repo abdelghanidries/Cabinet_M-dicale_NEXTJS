@@ -1,14 +1,11 @@
 "use client"
 
 import React, { useEffect } from 'react'
-import Navbar from "@/app/(components)/Navbar"
 import Sidebar from '@/app/(components)/sidebar'
 import StoreProvider, { useAppSelector } from '../redux'
 import  {AuthProvider} from '@/app/(components)/context/AuthContext';
 
 import Nav from '../(components)/Navbar/nav'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
 import CreateAppointment from '../(components)/appointments/create-appointment'
 
 

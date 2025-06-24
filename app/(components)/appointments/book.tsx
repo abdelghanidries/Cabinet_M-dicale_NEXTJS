@@ -16,7 +16,7 @@ export default function BookAppointmentCalendar() {
   const { data: session } = useSession();
   
     const userId = session?.user.id;
-    const userRole = session?.user.role;
+   
   // Récupérer les rendez-vous en attente via RTK Query
   const {
     data: appointments,
