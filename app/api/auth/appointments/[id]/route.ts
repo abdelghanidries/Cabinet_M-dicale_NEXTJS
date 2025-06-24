@@ -2,28 +2,17 @@ import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
 // 🟡 Prendre un rendez-vous
-export async function PATCH(
-  req: Request,
-  { params }: { params: { id: string } } // ✅ On destructure directement params
-) {
+export async function PATCH(req: Request, { params }: { params: { id: string } }) {
   try {
-    const appointmentId = params.id; // ✅ Accès correct
+    const appointmentId = params.id;
     const { patientId } = await req.json();
 
-    // Vérifier si le patient existe
-    const patient = await db.user.findUnique({
-      where: { id: patientId },
-    });
-
+    const patient = await db.user.findUnique({ where: { id: patientId } });
     if (!patient || patient.role !== "USER") {
       return NextResponse.json({ error: "Seuls les patients peuvent réserver un rendez-vous" }, { status: 403 });
     }
 
-    // Vérifier si le rendez-vous est disponible
-    const appointment = await db.appointment.findUnique({
-      where: { id: appointmentId },
-    });
-
+    const appointment = await db.appointment.findUnique({ where: { id: appointmentId } });
     if (!appointment) {
       return NextResponse.json({ error: "Rendez-vous introuvable" }, { status: 404 });
     }
@@ -32,7 +21,6 @@ export async function PATCH(
       return NextResponse.json({ error: "Ce rendez-vous est déjà pris" }, { status: 400 });
     }
 
-    // Mettre à jour le rendez-vous avec le patientId
     const updatedAppointment = await db.appointment.update({
       where: { id: appointmentId },
       data: {
@@ -43,14 +31,13 @@ export async function PATCH(
 
     return NextResponse.json(updatedAppointment, { status: 200 });
   } catch (error) {
+    console.error("Erreur PATCH:", error); // ✅ LOG
     return NextResponse.json({ error: "Erreur lors de la réservation du rendez-vous" }, { status: 500 });
   }
 }
 
-
 export async function GET() {
   try {
-    // Récupérer les rendez-vous en attente (status PENDING et sans patient)
     const pendingAppointments = await db.appointment.findMany({
       where: {
         status: "PENDING",
@@ -59,6 +46,7 @@ export async function GET() {
     });
     return NextResponse.json(pendingAppointments, { status: 200 });
   } catch (error) {
+    console.error("Erreur GET:", error); // ✅ LOG
     return NextResponse.json({ error: "Erreur lors de la récupération des rendez-vous" }, { status: 500 });
   }
 }

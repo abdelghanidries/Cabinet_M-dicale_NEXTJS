@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { useSession } from "next-auth/react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
+import React, { useState } from "react"; 
 
 export default function BookAppointmentCalendar() {
   const { data: session } = useSession();

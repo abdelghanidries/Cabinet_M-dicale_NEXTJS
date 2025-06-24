@@ -3,7 +3,7 @@
 import { Button } from '@/components/ui/button';
 import { handleSignOut } from "@/actions/authActions";
 import { useAppDispatch, useAppSelector } from '@/app/redux';
-import { setIsDarkMode, setIsSidebarCollapsed } from '@/state';
+import { setIsSidebarCollapsed } from '@/state'; // ✅ supprimé setIsDarkMode
 import { Bell, Menu, User, LogOut } from 'lucide-react';
 import {
   DropdownMenu,
@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react'; // ✅ supprimé useState
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const Nav = () => {
@@ -24,10 +24,9 @@ const Nav = () => {
   const lastname = session?.user.lastname;
   const email = session?.user.email;
 
-  
   const dispatch = useAppDispatch();
   const isSidebarCollapsed = useAppSelector((state) => state.global.isSidebarCollapsed);
-  
+
   const toggleSidebar = () => dispatch(setIsSidebarCollapsed(!isSidebarCollapsed));
 
   const getUserInitials = () => {
@@ -36,7 +35,10 @@ const Nav = () => {
   };
 
   useEffect(() => {
-    if (userId) setDoctorId(userId);
+    if (userId) {
+      // ⛔️ setDoctorId n'existe pas dans ce code — à supprimer si inutilisé
+      // setDoctorId(userId); 
+    }
   }, [userId]);
 
   return (
@@ -74,7 +76,7 @@ const Nav = () => {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          
+
           <DropdownMenuContent align="end" className="w-64 p-2">
             <DropdownMenuLabel className="p-3">
               <div className="flex flex-col space-y-1">
@@ -86,12 +88,12 @@ const Nav = () => {
                 </p>
               </div>
             </DropdownMenuLabel>
-            
+
             <DropdownMenuSeparator className="my-1" />
-            
+
             <form action={handleSignOut}>
               <DropdownMenuItem asChild>
-                <button 
+                <button
                   type="submit"
                   className="flex items-center w-full px-3 py-2 text-sm rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 text-red-600 dark:text-red-400 cursor-pointer"
                 >

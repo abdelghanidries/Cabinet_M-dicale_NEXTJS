@@ -1,6 +1,7 @@
 // app/api/appointments/available/route.ts
 import { NextResponse } from "next/server";
 import { db } from "@/lib/db";
+import { Prisma } from "@prisma/client";
 
 export async function GET(request: Request) {
   try {
@@ -8,13 +9,17 @@ export async function GET(request: Request) {
     const doctorId = searchParams.get('doctorId');
     const specialty = searchParams.get('specialty');
 
-    const whereClause: any = {
+    const whereClause: Prisma.AppointmentWhereInput = {
       status: 'PENDING',
-      startTime: { gt: new Date() }
+      startTime: { gt: new Date() },
     };
 
     if (doctorId) whereClause.doctorId = doctorId;
-    if (specialty) whereClause.doctor = { doctorSpeciality: specialty };
+    if (specialty) {
+      whereClause.doctor = {
+        doctorSpeciality: specialty
+      };
+    }
 
     const appointments = await db.appointment.findMany({
       where: whereClause,

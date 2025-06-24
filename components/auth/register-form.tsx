@@ -1,6 +1,7 @@
 "use client";
+
 import * as z from "zod";
-import { useTransition } from "react";
+import { useTransition, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Input } from "@/components/ui/input";
@@ -19,17 +20,12 @@ import { Button } from "../ui/button";
 import { Footer } from "./footer";
 import { register } from "@/actions/register";
 import { RegisterSchema } from "@/schemas";
-import { useState } from "react";
-
-
 
 export const RegisterForm = () => {
   const [notification, setNotification] = useState<{
-  type: "success" | "error";
-  message: string;
-} | null>(null);
-
-  
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
   const [isPending, startTransition] = useTransition();
 
@@ -42,44 +38,69 @@ export const RegisterForm = () => {
       password: "",
       role: "",
       doctorSpeciality: "",
-      code: ""
+      code: "",
     },
   });
 
   const onSubmit = (values: z.infer<typeof RegisterSchema>) => {
-  startTransition(() => {
-    register(values).then((data) => {
-      if (data.success) {
-        setNotification({ type: "success", message: "Account successfully created!" });
-        window.location.href = "/?status=success";
-
-      } else {
-        setNotification({ type: "error", message: data.error || "Registration failed." });
-      }
-    }).catch(() => {
-      setNotification({ type: "error", message: "An unexpected error occurred." });
+    startTransition(() => {
+      register(values)
+        .then((data) => {
+          if (data.success) {
+            setNotification({
+              type: "success",
+              message: "Compte créé avec succès !",
+            });
+            window.location.href = "/?status=success";
+          } else {
+            setNotification({
+              type: "error",
+              message: data.error || "Échec de l'inscription.",
+            });
+          }
+        })
+        .catch(() => {
+          setNotification({
+            type: "error",
+            message: "Une erreur inattendue est survenue.",
+          });
+        });
     });
-  });
-};
-
+  };
 
   return (
-    <div className="h-screen flex items-center justify-center ">
+    <div className="h-screen flex items-center justify-center">
       <div className="w-full max-w-md bg-white rounded-2xl p-6 shadow-xl border border-border mx-4 h-[95vh] flex flex-col">
+        
+        {/* 🔔 Notification */}
+        {notification && (
+          <div
+            className={`text-sm p-2 mb-4 rounded-md text-white ${
+              notification.type === "success" ? "bg-green-500" : "bg-red-500"
+            }`}
+          >
+            {notification.message}
+          </div>
+        )}
+
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 flex flex-col gap-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="flex-1 flex flex-col gap-4"
+          >
             <div className="text-center">
               <h1 className="text-3xl font-bold text-primary mb-2">
                 Create Account
               </h1>
-              <p className="text-muted-foreground text-sm">Join our professional community</p>
+              <p className="text-muted-foreground text-sm">
+                Join our professional community
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2 flex-1">
               <div className="space-y-1">
-                <Label className="text-sm font-medium text-foreground">First Name</Label>
+                <Label>First Name</Label>
                 <Input
-                  className="bg-input border border-border text-foreground placeholder-muted-foreground rounded-md px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary"
                   id="name"
                   {...form.register("name")}
                   placeholder="John"
@@ -88,9 +109,8 @@ export const RegisterForm = () => {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-sm font-medium text-foreground">Last Name</Label>
+                <Label>Last Name</Label>
                 <Input
-                  className="bg-input border border-border text-foreground placeholder-muted-foreground rounded-md px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary"
                   id="lastname"
                   {...form.register("lastname")}
                   placeholder="Doe"
@@ -99,9 +119,8 @@ export const RegisterForm = () => {
               </div>
 
               <div className="md:col-span-2 space-y-1">
-                <Label className="text-sm font-medium text-foreground">Email</Label>
+                <Label>Email</Label>
                 <Input
-                  className="bg-input border border-border text-foreground placeholder-muted-foreground rounded-md px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary"
                   type="email"
                   id="email"
                   {...form.register("email")}
@@ -111,9 +130,8 @@ export const RegisterForm = () => {
               </div>
 
               <div className="md:col-span-2 space-y-1">
-                <Label className="text-sm font-medium text-foreground">Password</Label>
+                <Label>Password</Label>
                 <Input
-                  className="bg-input border border-border text-foreground placeholder-muted-foreground rounded-md px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary"
                   type="password"
                   id="password"
                   {...form.register("password")}
@@ -123,17 +141,17 @@ export const RegisterForm = () => {
               </div>
 
               <div className="md:col-span-2 space-y-1">
-                <Label className="text-sm font-medium text-foreground">Role</Label>
+                <Label>Role</Label>
                 <Select
                   onValueChange={(value) => form.setValue("role", value)}
                   defaultValue={form.watch("role")}
                 >
-                  <SelectTrigger className="bg-input border border-border text-sm text-foreground rounded-md px-3 py-2 focus:ring-2 focus:ring-primary">
+                  <SelectTrigger>
                     <SelectValue placeholder="Select a role" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border border-border text-sm text-foreground">
+                  <SelectContent>
                     <SelectGroup>
-                      <SelectLabel className="text-accent">Roles</SelectLabel>
+                      <SelectLabel>Roles</SelectLabel>
                       <SelectItem value="USER">USER</SelectItem>
                       <SelectItem value="Doctor">Doctor</SelectItem>
                       <SelectItem value="ADMIN_Imagery">ADMIN Imagery</SelectItem>
@@ -145,17 +163,19 @@ export const RegisterForm = () => {
               </div>
 
               <div className="md:col-span-2 space-y-1">
-                <Label className="text-sm font-medium text-foreground">Doctor Speciality</Label>
+                <Label>Doctor Speciality</Label>
                 <Select
-                  onValueChange={(value) => form.setValue("doctorSpeciality", value)}
+                  onValueChange={(value) =>
+                    form.setValue("doctorSpeciality", value)
+                  }
                   defaultValue={form.watch("doctorSpeciality")}
                 >
-                  <SelectTrigger className="bg-input border border-border text-sm text-foreground rounded-md px-3 py-2 focus:ring-2 focus:ring-primary">
+                  <SelectTrigger>
                     <SelectValue placeholder="Select a speciality" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border border-border text-sm text-foreground">
+                  <SelectContent>
                     <SelectGroup>
-                      <SelectLabel className="text-accent">Specialities</SelectLabel>
+                      <SelectLabel>Specialities</SelectLabel>
                       <SelectItem value="Cardiologue">Cardiologue</SelectItem>
                       <SelectItem value="Dermatologue">Dermatologue</SelectItem>
                       <SelectItem value="Gynécologue">Gynécologue</SelectItem>
@@ -167,9 +187,8 @@ export const RegisterForm = () => {
               </div>
 
               <div className="md:col-span-2 space-y-1">
-                <Label className="text-sm font-medium text-foreground">Security Code</Label>
+                <Label>Security Code</Label>
                 <Input
-                  className="bg-input border border-border text-foreground placeholder-muted-foreground rounded-md px-3 py-2 text-sm focus:border-primary focus:ring-2 focus:ring-primary"
                   id="code"
                   {...form.register("code")}
                   placeholder="XXXX-XXXX-XXXX"
@@ -183,7 +202,7 @@ export const RegisterForm = () => {
               disabled={isPending}
               className="w-full py-2 text-sm bg-primary text-white font-semibold rounded-md transition-all duration-200 hover:bg-secondary active:scale-95"
             >
-              {isPending ? 'Creating...' : 'Register Now'}
+              {isPending ? "Creating..." : "Register Now"}
             </Button>
           </form>
         </Form>

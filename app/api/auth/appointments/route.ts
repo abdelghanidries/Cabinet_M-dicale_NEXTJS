@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 // 🟢 Création d'un rendez-vous par un médecin
 export async function POST(req: Request) {
   try {
-    const reqBody = await req.json(); // ← CORRECTION
+    const reqBody = await req.json();
 
     const { 
       date,
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       doctorId 
     } = reqBody;
 
-    console.log("Contenu de reqBody:", reqBody); // ← Log correct
+    console.log("Contenu de reqBody:", reqBody);
 
     // Vérification du médecin
     const doctor = await db.user.findUnique({
@@ -44,8 +44,6 @@ export async function POST(req: Request) {
     }
 
     // Création du rendez-vous
-    console.log("Valeurs reçues :", { date, startTime, endTime, reason, doctorId });
-
     const appointment = await db.appointment.create({
       data: {
         date: new Date(date),
@@ -63,10 +61,18 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json(appointment, { status: 201 });
-  } catch (error: any) {
-    console.error("Erreur détaillée:", error);
+
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("Erreur détaillée:", error);
+      return NextResponse.json(
+        { error: "Erreur lors de la création du rendez-vous: " + error.message },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json(
-      { error: "Erreur lors de la création du rendez-vous: " + (error?.message || "Inconnue") },
+      { error: "Erreur inconnue lors de la création du rendez-vous." },
       { status: 500 }
     );
   }
