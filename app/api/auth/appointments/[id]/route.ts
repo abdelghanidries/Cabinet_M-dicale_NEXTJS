@@ -3,10 +3,10 @@ import { db } from "@/lib/db";
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const appointmentId = params.id;
+    const appointmentId = context.params.id;
     const { patientId } = await req.json();
 
     const patient = await db.user.findUnique({ where: { id: patientId } });
