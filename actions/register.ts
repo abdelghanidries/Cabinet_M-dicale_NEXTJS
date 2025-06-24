@@ -5,7 +5,7 @@ import bcrypt from "bcrypt";
 import { db } from "@/lib/db";  // Assure-toi que tu utilises la bonne instance Prisma ici
 import { RegisterSchema } from "@/schemas";
 import { getUserByEmail } from "@/data/data";
-import { redirect } from "next/navigation";
+
 
 // Fonction pour l'enregistrement de l'utilisateur
 export const register = async (values: z.infer<typeof RegisterSchema>) => {

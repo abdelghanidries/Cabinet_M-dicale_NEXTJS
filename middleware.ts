@@ -9,14 +9,14 @@ import {
   authRoutes,
   publicRoutes
 } from "@/routes";
-import { UserRole } from "@prisma/client";
+
 
 const { auth } = NextAuth(authConfig);
 
 export default auth((req) => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
-  const userRole = req.auth?.user?.role; // Ajout pour récupérer le rôle
+  
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);

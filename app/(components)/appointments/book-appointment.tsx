@@ -40,7 +40,7 @@ export default function BookAppointmentCalendar() {
   const [errorMessage, setErrorMessage] = useState("");
 
   const { data: doctors, isLoading: isLoadingDoctors } = useGetDoctorsQuery();
-  const [bookAppointment, { isLoading, error: bookError }] = useBookAppointmentMutation();
+  const [bookAppointment, { isLoading: isBooking, error: bookError }] = useBookAppointmentMutation();
 
   const {
     data: appointments,
@@ -56,7 +56,7 @@ export default function BookAppointmentCalendar() {
     doctors?.map((doctor: Doctor) => doctor.doctorSpeciality).filter(Boolean) || []
   )];
 
-  const filteredDoctors = selectedSpecialty 
+  const filteredDoctors = selectedSpecialty
     ? doctors?.filter((doctor: Doctor) => doctor.doctorSpeciality === selectedSpecialty)
     : doctors;
 
@@ -87,60 +87,6 @@ export default function BookAppointmentCalendar() {
     }
   };
 
-  const DoctorsList = () => {
-    if (isLoadingDoctors) {
-      return (
-        <div className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <Skeleton key={i} className="h-20 w-full rounded-lg" />
-          ))}
-        </div>
-      );
-    }
-
-    if (!filteredDoctors?.length) {
-      return (
-        <div className="text-center text-muted-foreground py-8">
-          Aucun médecin trouvé
-        </div>
-      );
-    }
-
-    return (
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
-        {filteredDoctors.map((doctor: Doctor) => (
-          <Card 
-            key={doctor.id}
-            className={`cursor-pointer transition-all hover:border-primary ${
-              selectedDoctor === doctor.id ? 'border-2 border-primary' : ''
-            }`}
-          >
-            <CardContent className="p-4 flex items-center justify-between">
-              <div className="flex-1">
-                <h3 className="font-semibold">Dr. {doctor.lastname} {doctor.name}</h3>
-                <div className="flex gap-2 mt-2">
-                  <Badge variant="outline" className="text-sm">
-                    {doctor.doctorSpeciality}
-                  </Badge>
-                </div>
-              </div>
-              <Button 
-                variant="outline"
-                onClick={() => {
-                  setSelectedDoctor(doctor.id);
-                  setSelectedSpecialty(doctor.doctorSpeciality);
-                  setSelectedDay(null);
-                }}
-              >
-                Voir les créneaux
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    );
-  };
-
   const DayContent = ({ date }: { date: Date }) => {
     const dateKey = format(date, "yyyy-MM-dd");
     const hasAppointments = groupedAppointments?.[dateKey];
@@ -164,7 +110,166 @@ export default function BookAppointmentCalendar() {
   return (
     <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <div className="flex-1 overflow-hidden">
-        {/* Le reste de la structure HTML reste inchangé */}
+        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] h-full gap-8 p-8">
+          {/* Liste des médecins */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200">
+              Liste des médecins
+            </h2>
+            <div className="space-y-4 mb-6">
+              <select
+                value={selectedSpecialty}
+                onChange={(e) => {
+                  setSelectedSpecialty(e.target.value);
+                  setSelectedDoctor("");
+                }}
+                className="w-full p-2 border rounded-md bg-white dark:bg-gray-800"
+              >
+                <option value="">Toutes les spécialités</option>
+                {uniqueSpecialties.map((specialty) => (
+                  <option key={specialty} value={specialty}>
+                    {specialty}
+                  </option>
+                ))}
+              </select>
+            </div>
+            {isLoadingDoctors ? (
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <Skeleton key={i} className="h-20 w-full rounded-lg" />
+                ))}
+              </div>
+            ) : (
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
+                {filteredDoctors?.map((doctor: Doctor) => (
+                  <Card
+                    key={doctor.id}
+                    className={`cursor-pointer transition-all hover:border-primary ${
+                      selectedDoctor === doctor.id ? "border-2 border-primary" : ""
+                    }`}
+                  >
+                    <CardContent className="p-4 flex items-center justify-between">
+                      <div className="flex-1">
+                        <h3 className="font-semibold">
+                          Dr. {doctor.lastname} {doctor.name}
+                        </h3>
+                        <div className="flex gap-2 mt-2">
+                          <Badge variant="outline" className="text-sm">
+                            {doctor.doctorSpeciality}
+                          </Badge>
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setSelectedDoctor(doctor.id);
+                          setSelectedSpecialty(doctor.doctorSpeciality);
+                          setSelectedDay(null);
+                        }}
+                      >
+                        Voir les créneaux
+                      </Button>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Calendrier et rendez-vous */}
+          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col border border-gray-100 dark:border-gray-700">
+            {selectedDoctor ? (
+              <>
+                <div className="p-6 border-b border-gray-100 dark:border-gray-700">
+                  <div className="flex justify-between items-center">
+                    <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
+                      Disponibilités du Dr. {doctors?.find(d => d.id === selectedDoctor)?.lastname}
+                    </h2>
+                    <Button variant="ghost" onClick={() => {
+                      setSelectedDoctor("");
+                      setSelectedDay(null);
+                    }}>
+                      ← Changer
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto">
+                  <div className="p-6">
+                    <Calendar
+                      mode="single"
+                      selected={selectedDay}
+                      onSelect={setSelectedDay}
+                      locale={fr}
+                      components={{ DayContent }}
+                      classNames={{
+                        month: "w-full",
+                        head_cell: "text-gray-500 dark:text-gray-400 text-sm font-medium",
+                        day_today: "bg-transparent",
+                        button: "hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full",
+                        cell: "h-12",
+                        nav_button: "size-7 bg-transparent hover:bg-gray-100 dark:hover:bg-gray-700"
+                      }}
+                    />
+                  </div>
+
+                  <div className="p-6 border-t border-gray-100 dark:border-gray-700">
+                    <h3 className="text-lg font-semibold mb-4">
+                      {selectedDay
+                        ? format(selectedDay, "EEEE d MMMM yyyy", { locale: fr })
+                        : "Sélectionnez une date"}
+                    </h3>
+
+                    {isLoadingAppointments ? (
+                      <div className="space-y-4">
+                        {[...Array(3)].map((_, i) => (
+                          <Skeleton key={i} className="h-20 w-full rounded-lg" />
+                        ))}
+                      </div>
+                    ) : selectedDay &&
+                      groupedAppointments?.[format(selectedDay, "yyyy-MM-dd")]?.length > 0 ? (
+                      <div className="grid gap-4">
+                        {groupedAppointments[format(selectedDay, "yyyy-MM-dd")].map((appointment) => (
+                          <Card key={appointment.id} className="hover:shadow-md transition-shadow">
+                            <CardContent className="p-4 flex items-center justify-between">
+                              <div>
+                                <p className="font-medium">
+                                  {format(parseISO(appointment.startTime), "HH'h'mm")} - {format(parseISO(appointment.endTime), "HH'h'mm")}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  {appointment.reason}
+                                </p>
+                                <p className="text-sm text-muted-foreground">
+                                  Type : {appointment.type}
+                                </p>
+                              </div>
+                              <Button
+                                onClick={() => handleReservation(appointment.id)}
+                                disabled={isBooking}
+                              >
+                                {isBooking ? "..." : "Réserver"}
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center text-muted-foreground py-8">
+                        Aucune disponibilité pour cette date
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="h-full flex items-center justify-center text-muted-foreground p-8">
+                <p className="text-center">
+                  {isLoadingDoctors ? "Chargement..." : "Sélectionnez un médecin"}
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
       <div className="fixed bottom-6 left-6 space-y-2">
