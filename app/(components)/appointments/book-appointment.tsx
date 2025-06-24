@@ -1,5 +1,4 @@
-"use client"
-
+"use client";
 
 import {
   useBookAppointmentMutation,
@@ -14,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { useSession } from "next-auth/react";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
-import React, { useState } from "react"; 
+import React, { useState } from "react";
 
 export default function BookAppointmentCalendar() {
   const { data: session } = useSession();
@@ -25,10 +24,9 @@ export default function BookAppointmentCalendar() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  // Récupération des données
   const { data: doctors, isLoading: isLoadingDoctors } = useGetDoctorsQuery();
-  const [bookAppointment, { isLoading, error: bookError }] = useBookAppointmentMutation();
-  
+  const [bookAppointment, { isLoading }] = useBookAppointmentMutation();
+
   const {
     data: appointments,
     isLoading: isLoadingAppointments,
@@ -39,12 +37,11 @@ export default function BookAppointmentCalendar() {
     doctorId: selectedDoctor
   });
 
-  // Formatage des données
   const uniqueSpecialties = [...new Set(
     doctors?.map(doctor => doctor.doctorSpeciality).filter(Boolean) || []
   )];
 
-  const filteredDoctors = selectedSpecialty 
+  const filteredDoctors = selectedSpecialty
     ? doctors?.filter(doctor => doctor.doctorSpeciality === selectedSpecialty)
     : doctors;
 
@@ -60,7 +57,6 @@ export default function BookAppointmentCalendar() {
     }
   }, {});
 
-  // Handlers
   const handleReservation = async (appointmentId) => {
     try {
       await bookAppointment({ appointmentId, patientId: userId }).unwrap();
@@ -73,7 +69,6 @@ export default function BookAppointmentCalendar() {
     }
   };
 
-  // Composants
   const DoctorsList = () => {
     if (isLoadingDoctors) {
       return (
@@ -96,7 +91,7 @@ export default function BookAppointmentCalendar() {
     return (
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-1">
         {filteredDoctors.map(doctor => (
-          <Card 
+          <Card
             key={doctor.id}
             className={`cursor-pointer transition-all hover:border-primary ${
               selectedDoctor === doctor.id ? 'border-2 border-primary' : ''
@@ -111,7 +106,7 @@ export default function BookAppointmentCalendar() {
                   </Badge>
                 </div>
               </div>
-              <Button 
+              <Button
                 variant="outline"
                 onClick={() => {
                   setSelectedDoctor(doctor.id);
@@ -152,7 +147,6 @@ export default function BookAppointmentCalendar() {
     <div className="h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
       <div className="flex-1 overflow-hidden">
         <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] h-full gap-8 p-8">
-          {/* Colonne gauche - Liste des médecins */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 overflow-y-auto">
             <h2 className="text-xl font-semibold mb-6 text-gray-800 dark:text-gray-200">
               Liste des médecins
@@ -175,7 +169,6 @@ export default function BookAppointmentCalendar() {
             <DoctorsList />
           </div>
 
-          {/* Colonne droite - Calendrier */}
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col border border-gray-100 dark:border-gray-700">
             {selectedDoctor ? (
               <>
@@ -184,8 +177,8 @@ export default function BookAppointmentCalendar() {
                     <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-200">
                       Disponibilités du Dr. {doctors?.find(d => d.id === selectedDoctor)?.lastname}
                     </h2>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       onClick={() => {
                         setSelectedDoctor("");
                         setSelectedDay(null);
@@ -217,12 +210,12 @@ export default function BookAppointmentCalendar() {
 
                   <div className="p-6 border-t border-gray-100 dark:border-gray-700">
                     <h3 className="text-lg font-semibold mb-4">
-                      {selectedDay ? 
-                        format(selectedDay, "EEEE d MMMM yyyy", { locale: fr }) : 
+                      {selectedDay ?
+                        format(selectedDay, "EEEE d MMMM yyyy", { locale: fr }) :
                         "Sélectionnez une date"
                       }
                     </h3>
-                    
+
                     {isLoadingAppointments ? (
                       <div className="space-y-4">
                         {[...Array(3)].map((_, i) => (
@@ -236,8 +229,7 @@ export default function BookAppointmentCalendar() {
                             <CardContent className="p-4 flex items-center justify-between">
                               <div>
                                 <p className="font-medium">
-                                  {format(parseISO(appointment.startTime), "HH'h'mm")} -{" "}
-                                  {format(parseISO(appointment.endTime), "HH'h'mm")}
+                                  {format(parseISO(appointment.startTime), "HH'h'mm")} - {format(parseISO(appointment.endTime), "HH'h'mm")}
                                 </p>
                                 <p className="text-sm text-muted-foreground">
                                   {appointment.reason}
@@ -275,7 +267,6 @@ export default function BookAppointmentCalendar() {
         </div>
       </div>
 
-      {/* Notifications */}
       <div className="fixed bottom-6 left-6 space-y-2">
         {successMessage && (
           <div className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center">
@@ -283,10 +274,10 @@ export default function BookAppointmentCalendar() {
             {successMessage}
           </div>
         )}
-        {(errorMessage || bookError) && (
+        {errorMessage && (
           <div className="bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg flex items-center">
             <span className="mr-2">✕</span>
-            {errorMessage || bookError?.data?.message}
+            {errorMessage}
           </div>
         )}
         {getError && (
