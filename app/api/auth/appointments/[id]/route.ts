@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-export async function PATCH(
-  req: NextRequest,
-  context: { params: { id: string } }
-) {
+type Context = {
+  params: {
+    id: string;
+  };
+};
+
+export async function PATCH(req: NextRequest, context: Context) {
   try {
     const appointmentId = context.params.id;
     const { patientId } = await req.json();
