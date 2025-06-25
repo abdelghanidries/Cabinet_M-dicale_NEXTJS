@@ -1,16 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
 
-type Context = {
-  params: {
-    id: string;
-  };
-};
-
 // 🟡 Prendre un rendez-vous
-export async function PATCH(req: NextRequest, context: Context) {
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } } // ✅ Correction ici
+) {
   try {
-    const appointmentId = context.params.id;
+    const appointmentId = params.id;
     const { patientId } = await req.json();
 
     const patient = await db.user.findUnique({
