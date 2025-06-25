@@ -1,7 +1,7 @@
 "use client";
 import * as z from "zod";
 
-
+import { useTransition } from "react";
 
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +26,7 @@ import { role  } from "@/actions/add_role";
 import { RoleSchema } from "@/schemas";
 
 export const RoleForm = () => {
-  
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<z.infer<typeof RoleSchema>>({
     resolver: zodResolver(RoleSchema),
