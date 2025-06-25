@@ -8,7 +8,7 @@
 
 datasource db {
   provider = "postgresql"
-  url = "postgresql://mydb_owner:npg_YBSTD4Vy2Kwm@ep-solitary-rain-ab731wjs-pooler.eu-west-2.aws.neon.tech/mydb?sslmode=require"
+  url = env("DATABASE_URL")
 
   relationMode = "prisma" // Conservez cette ligne
 }
