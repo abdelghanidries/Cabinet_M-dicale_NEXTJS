@@ -1,8 +1,6 @@
 "use client";
 import * as z from "zod";
-
 import { useTransition } from "react";
-
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
@@ -17,16 +15,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
 import { Form } from "@/components/ui/form";
-
 import { Button } from "../ui/button";
 
-import { role  } from "@/actions/add_role";
+import { role } from "@/actions/add_role";
 import { RoleSchema } from "@/schemas";
 
 export const RoleForm = () => {
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition(); // ✅ Retire isPending
 
   const form = useForm<z.infer<typeof RoleSchema>>({
     resolver: zodResolver(RoleSchema),
@@ -37,10 +33,12 @@ export const RoleForm = () => {
       roleType: "",
     },
   });
+
   const onSubmit = (values: z.infer<typeof RoleSchema>) => {
     startTransition(() => {
       role(values).then((data) => {
         console.log(data.success);
+        // Optionnel : toast de succès ici
       });
     });
   };
@@ -48,88 +46,68 @@ export const RoleForm = () => {
   return (
     <div className="w-[300px] mx-10 my-10">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="">
-          <h1 className="text-2xl font-bold text-white mb-6"> ADD ROLE</h1>
+        <form onSubmit={form.handleSubmit(onSubmit)}>
+          <h1 className="text-2xl font-bold text-white mb-6">ADD ROLE</h1>
+
           <div className="mb-4">
-            <Label
-              className="block text-sm font-bold text-gray-300"
-              htmlFor="name"
-            >
+            <Label className="block text-sm font-bold text-gray-300" htmlFor="name">
               First Name
             </Label>
             <Input
               className="mt-1 p-2 w-full bg-gray-700 border border-gray-600 rounded-md text-white"
-              type=""
               id="name"
               {...form.register("name")}
               placeholder="First Name"
             />
           </div>
+
           <div className="mb-4">
-            <Label
-              className="brlock text-sm font-bold text-gray-300"
-              htmlFor="lastname"
-            >
+            <Label className="block text-sm font-bold text-gray-300" htmlFor="lastname">
               Last Name
             </Label>
             <Input
               className="mt-1 p-2 w-full bg-gray-700 border border-gray-600 rounded-md text-white"
-              type=""
               id="lastname"
               {...form.register("lastname")}
               placeholder="Last Name"
             />
           </div>
 
-          
-
-
           <div className="mb-4">
-            <Label
-              className="block text-sm font-bold text-gray-300"
-              htmlFor="code"
-            >
+            <Label className="block text-sm font-bold text-gray-300" htmlFor="code">
               Code
             </Label>
             <Input
               className="mt-1 p-2 w-full bg-gray-700 border border-gray-600 rounded-md text-white"
-              type=""
               id="code"
               {...form.register("code")}
               placeholder="Code"
             />
           </div>
 
-          
-        
-
           <div className="mb-4">
-
-          <Label
-              className="block text-sm font-bold text-gray-300"
-              htmlFor="role"
-            >
+            <Label className="block text-sm font-bold text-gray-300" htmlFor="roleType">
               Role
             </Label>
             <Select
-             onValueChange={(value) => form.setValue("roleType", value)} // ✅ Mise à jour de `role`
-                  defaultValue={form.watch("roleType")}
-               >
-  <SelectTrigger className="mt-1 p-2 w-full bg-gray-700 border border-gray-600 rounded-md text-white">
-    <SelectValue placeholder="Select a ROLE" />
-  </SelectTrigger>
-  <SelectContent>
-    <SelectGroup>
-      <SelectLabel>ROLE</SelectLabel>
-      <SelectItem value="Doctor">Doctor</SelectItem>
-      <SelectItem value="ADMIN_Imagery">ADMIN_Imagery</SelectItem>
-      <SelectItem value="ADMIN_LAB_ANALYSE">ADMIN_LAB_ANALYSE</SelectItem>
-      <SelectItem value="ADMIN">ADMIN</SelectItem>
-    </SelectGroup>
-  </SelectContent>
-</Select>
+              onValueChange={(value) => form.setValue("roleType", value)}
+              defaultValue={form.watch("roleType")}
+            >
+              <SelectTrigger className="mt-1 p-2 w-full bg-gray-700 border border-gray-600 rounded-md text-white">
+                <SelectValue placeholder="Select a ROLE" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>ROLE</SelectLabel>
+                  <SelectItem value="Doctor">Doctor</SelectItem>
+                  <SelectItem value="ADMIN_Imagery">ADMIN_Imagery</SelectItem>
+                  <SelectItem value="ADMIN_LAB_ANALYSE">ADMIN_LAB_ANALYSE</SelectItem>
+                  <SelectItem value="ADMIN">ADMIN</SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
 
-           </div>
           <div className="flex justify-end">
             <Button
               type="submit"
